@@ -10,18 +10,17 @@ from .serializers import TripSerializer
 from django.http import HttpResponse
 
 
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST", "PUT"])
 def index(request):
-    trips = Trip.objects.all()
-    serialized_data = TripSerializer(trips, many=True)
-    return JsonResponse({"status": True, "trips": serialized_data.data}, safe=False, status=200);
-
-
-@require_http_methods(["POST"])
-def store(request):
-    payload = JSONParser().parse(request)
-    serializer = TripSerializer(data=payload)
-    if serializer.is_valid():
-        serializer.save()
-        return JsonResponse(serializer.data, status=200)
-    return JsonResponse(serializer.errors, status=403)
+    if request.method == 'POST':
+        payload = JSONParser().parse(request)
+        serializer = TripSerializer(data=payload)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({'status': True, 'description': 'Trip created successfully', 
+            'trip': serializer.data}, status=200)
+        return JsonResponse({'status': False, 'description': 'a validation error occurred','error': serializer.errors}, status=403)
+    else:
+        trips = Trip.objects.all()
+        serialized_data = TripSerializer(trips, many=True)
+        return JsonResponse({"status": True,'description': 'Trip fetched successfully', "trips": serialized_data.data}, safe=False, status=200)
