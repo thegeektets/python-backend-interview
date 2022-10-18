@@ -8,9 +8,12 @@ from .models import Trip
 from .serializers import TripSerializer
 # Create your views here.
 from django.http import HttpResponse
+from rest_framework.throttling import UserRateThrottle
+
 
 
 @require_http_methods(["GET", "POST", "PUT"])
+#@throttle_classes([UserRateThrottle])
 def index(request):
     if request.method == 'POST':
         payload = JSONParser().parse(request)
